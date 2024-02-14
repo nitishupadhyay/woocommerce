@@ -4,7 +4,12 @@
 import { WooHeaderItem, useAdminSidebarWidth } from '@woocommerce/admin-layout';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
-import { createElement, useContext, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	useContext,
+	useEffect,
+	useMemo,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 import { chevronLeft, group, Icon } from '@wordpress/icons';
@@ -28,6 +33,7 @@ import { LoadingState } from './loading-state';
 import { PrepublishButton } from '../prepublish-panel';
 import { Tabs } from '../tabs';
 import { HEADER_PINNED_ITEMS_SCOPE, TRACKS_SOURCE } from '../../constants';
+import { useShowPrepublishChecks } from '../../hooks/use-show-prepublish-checks';
 
 export type HeaderProps = {
 	onTabSelect: ( tabId: string | null ) => void;
@@ -65,6 +71,21 @@ export function Header( {
 		'name'
 	);
 
+	const { isResolving, showPrepublishChecks } = useShowPrepublishChecks();
+	const isPublished =
+		productType === 'product'
+			? lastPersistedProduct?.status === 'publish'
+			: true;
+
+	const isPrepublishButtonVisible = useMemo(
+		() =>
+			! isPublished &&
+			! isResolving &&
+			showPrepublishChecks &&
+			window.wcAdminFeatures[ 'product-pre-publish-modal' ],
+		[ showPrepublishChecks, isResolving ]
+	);
+
 	const sidebarWidth = useAdminSidebarWidth();
 
 	useEffect( () => {
@@ -84,10 +105,6 @@ export function Header( {
 	}
 
 	const isVariation = lastPersistedProduct?.parent_id > 0;
-	const isPublished =
-		productType === 'product'
-			? lastPersistedProduct?.status === 'publish'
-			: true;
 
 	return (
 		<div
@@ -163,8 +180,7 @@ export function Header( {
 						productStatus={ lastPersistedProduct?.status }
 					/>
 
-					{ ! isPublished &&
-					window.wcAdminFeatures[ 'product-pre-publish-modal' ] ? (
+					{ isPrepublishButtonVisible ? (
 						<PrepublishButton
 							productId={ productId }
 							productType={ productType }
