@@ -17,7 +17,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	const SLUG = 'single-product';
+	public $slug = 'single-product';
 
 	/**
 	 * The title of the template.
@@ -51,7 +51,7 @@ class SingleProductTemplate extends AbstractTemplate {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
 			global $post;
 
-			$valid_slugs = [ self::SLUG ];
+			$valid_slugs = [ $this->slug ];
 			if ( 'product' === $post->post_type && $post->post_name ) {
 				$valid_slugs[] = 'single-product-' . $post->post_name;
 			}
@@ -61,7 +61,7 @@ class SingleProductTemplate extends AbstractTemplate {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-			if ( ! BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
+			if ( ! BlockTemplateUtils::theme_has_template( $this->slug ) ) {
 				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 			}
 		}
@@ -78,7 +78,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	public function update_single_product_content( $query_result, $query, $template_type ) {
 		$query_result = array_map(
 			function( $template ) {
-				if ( str_contains( $template->slug, self::SLUG ) ) {
+				if ( str_contains( $template->slug, $this->slug ) ) {
 					// We don't want to add the compatibility layer on the Editor Side.
 					// The second condition is necessary to not apply the compatibility layer on the REST API. Gutenberg uses the REST API to clone the template.
 					// More details: https://github.com/woocommerce/woocommerce-blocks/issues/9662.

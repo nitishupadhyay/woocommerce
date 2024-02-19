@@ -200,7 +200,7 @@ class BlockTemplateUtils {
 		$template->content = self::inject_theme_attribute_in_content( $template_content );
 		// Remove the term description block from the archive-product template
 		// as the Product Catalog/Shop page doesn't have a description.
-		if ( ProductCatalogTemplate::SLUG === $template_file->slug ) {
+		if ( 'archive-product' === $template_file->slug ) {
 			$template->content = str_replace( '<!-- wp:term-description {"align":"wide"} /-->', '', $template->content );
 		}
 		// Plugin was agreed as a valid source value despite existing inline docs at the time of creating: https://github.com/WordPress/gutenberg/issues/36597#issuecomment-976232909.
@@ -447,7 +447,7 @@ class BlockTemplateUtils {
 	public static function template_is_eligible_for_product_archive_fallback( $template_slug ) {
 		$registered_template = BlockTemplatesRegistry::get_template( $template_slug );
 		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
-			return ProductCatalogTemplate::SLUG === $registered_template->fallback_template;
+			return 'archive-product' === $registered_template->fallback_template;
 		}
 		return false;
 	}
@@ -468,7 +468,7 @@ class BlockTemplateUtils {
 		$array_filter = array_filter(
 			$db_templates,
 			function ( $template ) use ( $template_slug ) {
-				return ProductCatalogTemplate::SLUG === $template->slug;
+				return 'archive-product' === $template->slug;
 			}
 		);
 
@@ -489,7 +489,7 @@ class BlockTemplateUtils {
 		}
 
 		foreach ( $db_templates as $template ) {
-			if ( ProductCatalogTemplate::SLUG === $template->slug ) {
+			if ( 'archive-product' === $template->slug ) {
 				return $template;
 			}
 		}
@@ -509,7 +509,7 @@ class BlockTemplateUtils {
 	public static function template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) {
 		return self::template_is_eligible_for_product_archive_fallback( $template_slug )
 			&& ! self::theme_has_template( $template_slug )
-			&& self::theme_has_template( ProductCatalogTemplate::SLUG );
+			&& self::theme_has_template( 'archive-product' );
 	}
 
 	/**
@@ -655,6 +655,41 @@ class BlockTemplateUtils {
 	 */
 	public static function template_has_legacy_template_block( $template ) {
 		return has_block( 'woocommerce/legacy-template', $template->content );
+	}
+
+	/**
+	 * Returns whether the passed `$template` has the legacy template block.
+	 *
+	 * @param WP_Block_Template $template The template object.
+	 * @param string            $template_type wp_template or wp_template_part.
+	 *
+	 * @return WP_Block_Template
+	 */
+	public static function update_template_data( $template, $template_type ) {
+		if ( ! $template ) {
+			return $template;
+		}
+		// Enforce our titles and descriptions for WooCommerce templates. They are more user-friendly.
+		// For example, instead of:
+		// * Title: `Tag (product_tag)`
+		// * Description: `Displays taxonomy: Tag.`
+		// we display:
+		// * Title: `Products by Tag`
+		// * Description: `Displays products filtered by a tag.`.
+		$formatted_title       = self::get_block_template_title( $template->slug );
+		$formatted_description = self::get_block_template_description( $template->slug );
+		$formatted_area        = self::get_block_template_area( $template->slug, $template_type );
+		if ( $formatted_title ) {
+			$template->title = $formatted_title;
+		}
+		if ( $formatted_description ) {
+			$template->description = $formatted_description;
+		}
+		if ( $formatted_area ) {
+			$template->area = $formatted_area;
+		}
+
+		return $template;
 	}
 
 	/**

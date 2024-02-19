@@ -16,7 +16,7 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	const SLUG = 'archive-product';
+	public $slug = 'archive-product';
 
 	/**
 	 * The title of the template.
@@ -48,13 +48,13 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) ) {
-			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
+			$templates = get_block_templates( array( 'slug__in' => array( $this->slug ) ) );
 
 			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-			if ( ! BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
+			if ( ! BlockTemplateUtils::theme_has_template( $this->slug ) ) {
 				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 			}
 		}

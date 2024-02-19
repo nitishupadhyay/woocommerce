@@ -24,7 +24,7 @@ class BlockTemplatesRegistry {
 	 * @param AbstractTemplate|AbstractTemplatePart $template Template to register.
 	 */
 	public static function register_template( $template ) {
-		self::$templates[ $template::SLUG ] = $template;
+		self::$templates[ $template->slug ] = $template;
 	}
 
 	/**

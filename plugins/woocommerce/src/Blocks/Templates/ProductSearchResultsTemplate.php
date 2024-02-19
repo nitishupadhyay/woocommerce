@@ -15,7 +15,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	const SLUG = 'product-search-results';
+	public $slug = 'product-search-results';
 
 	/**
 	 * The title of the template.
@@ -36,7 +36,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
+	public $fallback_template = 'archive-product';
 
 	/**
 	 * Initialization method.
@@ -54,13 +54,13 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && is_post_type_archive( 'product' ) && is_search() ) {
-			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
+			$templates = get_block_templates( array( 'slug__in' => array( $this->slug ) ) );
 
 			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-			if ( ! BlockTemplateUtils::theme_has_template( self::SLUG ) ) {
+			if ( ! BlockTemplateUtils::theme_has_template( $this->slug ) ) {
 				add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 			}
 		}
@@ -73,7 +73,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	 */
 	public function update_search_template_hierarchy( $templates ) {
 		if ( ( is_search() && is_post_type_archive( 'product' ) ) && wc_current_theme_is_fse_theme() ) {
-			array_unshift( $templates, self::SLUG );
+			array_unshift( $templates, $this->slug );
 		}
 		return $templates;
 	}

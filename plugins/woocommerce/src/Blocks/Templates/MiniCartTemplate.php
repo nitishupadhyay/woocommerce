@@ -13,7 +13,7 @@ class MiniCartTemplate extends AbstractTemplatePart {
 	 *
 	 * @var string
 	 */
-	const SLUG = 'mini-cart';
+	public $slug = 'mini-cart';
 
 	/**
 	 * The title of the template.

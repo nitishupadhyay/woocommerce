@@ -156,7 +156,7 @@ class BlockTemplatesController {
 		}
 
 		$wp_query_args  = array(
-			'post_name__in' => array( ProductCatalogTemplate::SLUG, $slug ),
+			'post_name__in' => array( 'archive-product', $slug ),
 			'post_type'     => $template_type,
 			'post_status'   => array( 'auto-draft', 'draft', 'publish', 'trash' ),
 			'no_found_rows' => true,
@@ -177,7 +177,7 @@ class BlockTemplatesController {
 			return null;
 		}
 
-		if ( count( $posts ) > 0 && ProductCatalogTemplate::SLUG === $posts[0]->post_name ) {
+		if ( count( $posts ) > 0 && 'archive-product' === $posts[0]->post_name ) {
 			$template = _build_block_template_result_from_post( $posts[0] );
 
 			if ( ! is_wp_error( $template ) ) {
@@ -212,7 +212,7 @@ class BlockTemplatesController {
 		);
 
 		if ( count( $templates_eligible_for_fallback ) > 0 ) {
-			$template_hierarchy[] = ProductCatalogTemplate::SLUG;
+			$template_hierarchy[] = 'archive-product';
 		}
 
 		return $template_hierarchy;
@@ -260,7 +260,7 @@ class BlockTemplatesController {
 
 		// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
 		if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-			$template_path   = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
+			$template_path   = BlockTemplateUtils::get_theme_template_path( 'archive-product' );
 			$template_object = BlockTemplateUtils::create_new_block_template_object( $template_path, $template_type, $template_slug, true );
 			return BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
 		}
@@ -314,16 +314,7 @@ class BlockTemplatesController {
 		if ( ! $block_template ) {
 			return $block_template;
 		}
-		if ( ! BlockTemplateUtils::template_has_title( $block_template ) ) {
-			$block_template->title = BlockTemplateUtils::get_block_template_title( $block_template->slug );
-		}
-		if ( ! $block_template->description ) {
-			$block_template->description = BlockTemplateUtils::get_block_template_description( $block_template->slug );
-		}
-		if ( ! $block_template->area || 'uncategorized' === $block_template->area ) {
-			$block_template->area = BlockTemplateUtils::get_block_template_area( $block_template->slug, $template_type );
-		}
-		return $block_template;
+		return BlockTemplateUtils::update_template_data( $block_template, $template_type );
 	}
 
 	/**
@@ -370,21 +361,6 @@ class BlockTemplatesController {
 				$query_result[] = $template_file;
 				continue;
 			}
-
-			$is_not_custom   = false === array_search(
-				$theme_slug . '//' . $template_file->slug,
-				array_column( $query_result, 'id' ),
-				true
-			);
-			$fits_slug_query =
-				! isset( $query['slug__in'] ) || in_array( $template_file->slug, $query['slug__in'], true );
-			$fits_area_query =
-				! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
-			$should_include  = $is_not_custom && $fits_slug_query && $fits_area_query;
-			if ( $should_include ) {
-				$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
-				$query_result[] = $template;
-			}
 		}
 
 		// We need to remove theme (i.e. filesystem) templates that have the same slug as a customised one.
@@ -403,17 +379,7 @@ class BlockTemplatesController {
 		 */
 		$query_result = array_map(
 			function( $template ) use ( $template_type ) {
-				if ( ! BlockTemplateUtils::template_has_title( $template ) ) {
-					$template->title = BlockTemplateUtils::get_block_template_title( $template->slug );
-				}
-				if ( ! $template->description ) {
-					$template->description = BlockTemplateUtils::get_block_template_description( $template->slug );
-				}
-				if ( ! $template->area || 'uncategorized' === $template->area ) {
-					$template->area = BlockTemplateUtils::get_block_template_area( $template->slug, $template_type );
-				}
-
-				return $template;
+				return BlockTemplateUtils::update_template_data( $template, $template_type );
 			},
 			$query_result
 		);
@@ -496,7 +462,7 @@ class BlockTemplatesController {
 
 			// If the theme has an archive-product.html template, but not a taxonomy-product_cat/tag/attribute.html template let's use the themes archive-product.html template.
 			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback_from_theme( $template_slug ) ) {
-				$template_file = BlockTemplateUtils::get_theme_template_path( ProductCatalogTemplate::SLUG );
+				$template_file = BlockTemplateUtils::get_theme_template_path( 'archive-product' );
 				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, true );
 				continue;
 			}
@@ -504,7 +470,7 @@ class BlockTemplatesController {
 			// At this point the template only exists in the Blocks filesystem, if is a taxonomy-product_cat/tag/attribute.html template
 			// let's use the archive-product.html template from Blocks.
 			if ( BlockTemplateUtils::template_is_eligible_for_product_archive_fallback( $template_slug ) ) {
-				$template_file = $this->get_template_path_from_woocommerce( ProductCatalogTemplate::SLUG );
+				$template_file = $this->get_template_path_from_woocommerce( 'archive-product' );
 				$templates[]   = BlockTemplateUtils::create_new_block_template_object( $template_file, $template_type, $template_slug, false );
 				continue;
 			}

@@ -13,7 +13,7 @@ class CheckoutHeaderTemplate extends AbstractTemplatePart {
 	 *
 	 * @var string
 	 */
-	const SLUG = 'checkout-header';
+	public $slug = 'checkout-header';
 
 	/**
 	 * The title of the template.

@@ -18,7 +18,7 @@ abstract class AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	const SLUG = '';
+	public $slug;
 
 	/**
 	 * The title of the template.
