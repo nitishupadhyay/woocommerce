@@ -83,7 +83,7 @@ export function Header( {
 			! isResolving &&
 			showPrepublishChecks &&
 			window.wcAdminFeatures[ 'product-pre-publish-modal' ],
-		[ showPrepublishChecks, isResolving ]
+		[ showPrepublishChecks, isPublished, isResolving ]
 	);
 
 	const sidebarWidth = useAdminSidebarWidth();
