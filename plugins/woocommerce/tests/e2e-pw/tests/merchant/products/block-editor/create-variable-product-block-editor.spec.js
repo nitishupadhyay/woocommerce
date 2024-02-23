@@ -41,14 +41,6 @@ test.describe( 'Variations tab', () => {
 				.last()
 				.fill( productData.summary );
 
-			try {
-				await page
-					.getByLabel( 'Close Tour' )
-					.click( { timeout: 3000 } );
-			} catch ( e ) {
-				console.log( 'Tour was not visible, skipping.' );
-			}
-
 			await clickOnTab( 'Variations', page );
 			await page
 				.getByRole( 'heading', { name: 'Variation options' } )
@@ -119,19 +111,6 @@ test.describe( 'Variations tab', () => {
 					name: 'Add',
 				} )
 				.click();
-
-			try {
-				await page
-					.getByLabel( 'Close Tour' )
-					.click( { timeout: 3000 } );
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users/1?_locale=user' ) &&
-						response.status() === 200
-				);
-			} catch ( e ) {
-				console.log( 'Tour was not visible, skipping.' );
-			}
 
 			page.on( 'dialog', ( dialog ) => dialog.accept( '50' ) );
 			await page.locator( `text=Set prices` ).click( { timeout: 3000 } );
