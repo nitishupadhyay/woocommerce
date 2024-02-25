@@ -15,11 +15,6 @@ exports.test = test.extend( {
 			woocommerce_block_product_tour_shown: 'yes',
 		} );
 
-		// Disable the product variations tour
-		await wcAdminApi.post( 'options', {
-			woocommerce_admin_variable_product_block_tour_shown: 'yes',
-		} );
-
 		await use( page );
 
 		// Disable product block editor
